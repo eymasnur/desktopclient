@@ -1,0 +1,14 @@
+C:\Users\user\Desktop\Desktop_client_api_kod\bin\Debug\net9.0\Desktop_client_api_kod.exe
+C:\Users\user\Desktop\Desktop_client_api_kod\bin\Debug\net9.0\Desktop_client_api_kod.deps.json
+C:\Users\user\Desktop\Desktop_client_api_kod\bin\Debug\net9.0\Desktop_client_api_kod.runtimeconfig.json
+C:\Users\user\Desktop\Desktop_client_api_kod\bin\Debug\net9.0\Desktop_client_api_kod.dll
+C:\Users\user\Desktop\Desktop_client_api_kod\bin\Debug\net9.0\Desktop_client_api_kod.pdb
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.AssemblyInfo.cs
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.csproj.CoreCompileInputs.cache
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.dll
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\refint\Desktop_client_api_kod.dll
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.pdb
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\Desktop_client_api_kod.genruntimeconfig.cache
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0\ref\Desktop_client_api_kod.dll
