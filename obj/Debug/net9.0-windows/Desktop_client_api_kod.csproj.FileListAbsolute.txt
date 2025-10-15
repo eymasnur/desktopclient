@@ -1,0 +1,4 @@
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0-windows\Desktop_client_api_kod.GeneratedMSBuildEditorConfig.editorconfig
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0-windows\Desktop_client_api_kod.AssemblyInfoInputs.cache
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0-windows\Desktop_client_api_kod.AssemblyInfo.cs
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net9.0-windows\Desktop_client_api_kod.csproj.CoreCompileInputs.cache

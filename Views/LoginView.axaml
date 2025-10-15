@@ -1,0 +1,24 @@
+<!-- ================================================================ -->
+<!-- LOGIN VIEW - Giriş Ekranı                                         -->
+<!-- ================================================================ -->
+
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Desktop_client_api_kod.Views.LoginView">
+
+    <!-- Ana Grid: Sol (436px) + Sağ (kalan) -->
+    <Grid ColumnDefinitions="436,*">
+        
+        <!-- ========== SOL PANEL (Koyu Gri #363D48) ========== -->
+        <Panel Grid.Column="0" Background="#363D48">
+            
+        </Panel>
+        
+        <!-- ========== SAĞ PANEL (Açık Gri #F3F4F6) ========== -->
+        <Panel Grid.Column="1" Background="#F3F4F6">
+            
+        </Panel>
+        
+    </Grid>
+
+</UserControl>

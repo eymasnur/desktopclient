@@ -2,6 +2,7 @@ using System;
 using System.IO;
 using System.Net.Http;
 using System.Net.Http.Headers;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
 using Desktop_client_api_kod.Infrastructure;
@@ -9,7 +10,6 @@ using Desktop_client_api_kod.Models;
 
 namespace Desktop_client_api_kod.Services
 {
-    // Swagger'da görünen API Integration uçları için hafif istemci
     public sealed class IntegrationClient
     {
         private readonly HttpApiClient _api;
@@ -21,12 +21,11 @@ namespace Desktop_client_api_kod.Services
             _settingsStore = settingsStore;
         }
 
-        // PUT /integration/job/create
-        // Multipart PUT /integration/job/create (X-API-Key destekli)
-        public async Task<HttpResponseMessage> CreateJobsAsync(
+        // PUT /integration/job/create - Dosya yükle ve sanitize başlat
+        public async Task<CreateJobResponse> CreateJobsAsync(
             string apiKey,
             string batchName,
-            string? passwordList,
+            string passwordList,
             string filePath,
             bool allowInsecureCertificates = true,
             CancellationToken ct = default)
@@ -69,8 +68,20 @@ namespace Desktop_client_api_kod.Services
             fileContent.Headers.ContentType = MediaTypeHeaderValue.Parse("application/octet-stream");
             form.Add(fileContent, "attachments", Path.GetFileName(filePath));
 
+            Console.WriteLine($"PUT URL: {normalizedBase}integration/job/create");
+            Console.WriteLine($"Batch Name: {batchName}");
+            Console.WriteLine($"File: {Path.GetFileName(filePath)}");
+
             var response = await http.PutAsync("integration/job/create", form, ct);
-            return response;
+            
+            var responseBody = await response.Content.ReadAsStringAsync(ct);
+            Console.WriteLine($"Response Status: {(int)response.StatusCode}");
+            Console.WriteLine($"Response Body: {responseBody}");
+            
+            response.EnsureSuccessStatusCode();
+            
+            // JSON'dan CreateJobResponse'a çevir
+            return JsonSerializer.Deserialize<CreateJobResponse>(responseBody);
         }
 
         // GET /integration/job/download/original/{id}
@@ -110,5 +121,3 @@ namespace Desktop_client_api_kod.Services
         }
     }
 }
-
-

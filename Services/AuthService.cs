@@ -75,6 +75,43 @@ namespace Desktop_client_api_kod.Services
             }
         }
 
+        // LDAP Login metodu
+        public async Task<bool> LoginWithLdapAsync(string username, string password, CancellationToken ct = default)
+        {
+            try
+            {
+                var request = new SignInRequest 
+                { 
+                    username = username,
+                    password = password,
+                    type = "91976df0-2bd2-472b-8c99-c06a07fe1b3c",  // Desktop client type
+                    auth = "d8d60515-71b6-4ad9-aa0f-53f7278d38a8",  // LDAP authentication UUID
+                    os = "ed790d54-ed48-43b6-ab21-b93303305993"
+                };
+
+                var response = await _api.PostJsonAsync<SignInRequest, SignInResponse>("user/signin", request, ct);
+
+                if (response == null || response.error || string.IsNullOrWhiteSpace(response.tokens.access))
+                {
+                    Console.WriteLine($"LDAP Login başarısız: {response?.message ?? "Bilinmeyen hata"}");
+                    return false;
+                }
+
+                var settings = await _settingsStore.LoadAsync();
+                settings.AuthToken = response.tokens.access;
+                settings.AuthTokenExpiresAt = DateTimeOffset.UtcNow.AddHours(1);
+                await _settingsStore.SaveAsync(settings);
+                
+                Console.WriteLine("LDAP Login başarılı!");
+                return true;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"LDAP Login hatası: {ex.Message}");
+                return false;
+            }
+        }
+
         public async Task<bool> ValidateApiKeyAsync(CancellationToken ct = default)
         {
             try

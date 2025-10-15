@@ -1,0 +1,127 @@
+<!-- ================================================================ -->
+<!-- HOSTNAME VIEW - Sunucu Bağlantı Ekranı                           -->
+<!-- ================================================================ -->
+
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             x:Class="Desktop_client_api_kod.Views.HostnameView">
+
+    <!-- Ana arka plan paneli (koyu gri) -->
+    <Panel Background="#363D48">
+        
+        <!-- DockPanel: Elemanları kenarlara sabitle -->
+        <DockPanel LastChildFill="True">
+            
+            <!-- ========== LOGO - Üstte sabit ========== -->
+            <StackPanel DockPanel.Dock="Top" 
+                        Margin="0,44,0,0"
+                        HorizontalAlignment="Center">
+                <Border Width="255.81" Height="66.8">
+                    <Image Source="/Assets/klearis-logo.png" 
+                           Stretch="Uniform"/>
+                </Border>
+            </StackPanel>
+            
+            <!-- ========== SLOGAN - Altta sabit ========== -->
+            <TextBlock DockPanel.Dock="Bottom"
+                       Margin="0,0,0,78"
+                       Text="Instant Data Safe. Confidently. At Scale."
+                       FontSize="20"
+                       Foreground="#FFFFFF"
+                       TextAlignment="Center"/>
+            
+            <!-- ========== ORTADA: Modal + Buton ========== -->
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center">
+                
+                <!-- ===== MODAL KUTUSU (Buton İçeride) ===== -->
+                <Border Width="460"
+                        Height="253"
+                        CornerRadius="12"
+                        Background="#CCFFFFFF"
+                        Padding="32"
+                        BoxShadow="0 4 8 #40D2D2D2">
+                    
+                    <!-- Modal içeriği -->
+                    <StackPanel>
+                        
+                        <!-- "You Are Offline" başlığı -->
+                        <TextBlock Text="You Are Offline"
+                                   FontSize="18"
+                                   FontWeight="Medium"
+                                   Foreground="#495057"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,20"
+                                   />
+                        
+                        <!-- "Please set hostname to start." açıklaması -->
+                        <TextBlock Text="Please set hostname to start."
+                                   FontSize="14"
+                                   Foreground="#495057"
+                                   TextAlignment="Center"
+                                   Margin="0,0,0,20"/>
+                        
+                        <!-- Hostname input grubu -->
+                        <StackPanel Spacing="4" Width="396" Margin="0,0,0,20">
+                            <TextBlock Text="Hostname"
+                                       FontSize="13"
+                                       FontWeight="Medium"
+                                       Foreground="#363D48"/>
+                            
+                            <TextBox x:Name="HostnameTextBox"
+                                     Height="38"
+                                     Padding="14,12"
+                                     Watermark="8.8.8.8 or example.com"
+                                     Background="#B3FFFFFF"
+                                     BorderBrush="#CED4DA"
+                                     BorderThickness="1"
+                                     CornerRadius="6"
+                                     FontSize="14"
+                                     Foreground="#1F2937"
+                                     VerticalContentAlignment="Center"/>
+
+                            <TextBlock x:Name="ErrorTextBlock"
+                                       Text="Invalid hostname"
+                                       FontSize="12"
+                                       Foreground="#ED5E5E"
+                                       IsVisible="False"
+                                       Margin="0,4,0,0"/>
+                        </StackPanel>
+                        
+                        <!-- ===== SET HOSTNAME BUTONU (Modal İçinde) ===== -->
+                        <Button x:Name="SetHostnameButton"
+                                Width="396"
+                                Height="38"
+                                Content="Set Hostname"
+                                Background="#6E92E1"
+                                Foreground="White"
+                                BorderThickness="0"
+                                CornerRadius="6"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                HorizontalAlignment="Center"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center"
+                                Click="SetHostnameButton_Click"
+                                Padding="14,11.5">
+                            
+                            <Button.Styles>
+                                <Style Selector="Button:pointerover">
+                                    <Setter Property="Background" Value="#5A7FD1"/>
+                                </Style>
+                                <Style Selector="Button:pressed">
+                                    <Setter Property="Background" Value="#4D6BB8"/>
+                                </Style>
+                            </Button.Styles>
+                        </Button>
+                        
+                    </StackPanel>
+                </Border>
+                
+            </StackPanel>
+            
+        </DockPanel>
+        
+    </Panel>
+
+</UserControl>
