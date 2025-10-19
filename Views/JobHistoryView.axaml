@@ -1,108 +1,274 @@
 <!-- ================================================================ -->
 <!-- JOB HISTORY VIEW - İş Geçmişi Ekranı                            -->
-<!-- Sol: 250px Sidebar | Sağ: Content Area                          -->
+<!-- Sol: Sidebar | Sağ: Content Area (Tablo + Başlık)              -->
 <!-- ================================================================ -->
 
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Desktop_client_api_kod.Views.JobHistoryView">
 
-    <!-- Ana Grid: Sol (250px) + Sağ (kalan) -->
+    <!-- Ana Grid: Sol sidebar 250px, Sağ alan kalan -->
     <Grid ColumnDefinitions="250,*">
         
         <!-- ========== SOL SIDEBAR ========== -->
         <Border Grid.Column="0" 
-                Background="#FFFFFF"
+                Background="#F3F6F9"
                 BorderBrush="#E5E7EB"
-                BorderThickness="0,0,1,0">  <!-- Sadece sağda border -->
+                BorderThickness="0,0,1,0">
             
             <StackPanel>
                 
-                <!-- Logo: K + klearis -->
-                <StackPanel Margin="20,24,20,32" HorizontalAlignment="Left">
-                    <StackPanel Orientation="Horizontal" Spacing="8">
-                        <!-- K logosu (32x32 koyu gri kare) -->
-                        <Border Width="32" Height="32" Background="#363D48" CornerRadius="4">
-                            <TextBlock Text="K" Foreground="White" FontSize="20" FontWeight="Bold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <!-- klearis yazısı -->
-                        <TextBlock Text="klearis" FontSize="18" FontWeight="SemiBold" 
-                                   Foreground="#1F2937" VerticalAlignment="Center"/>
-                    </StackPanel>
+                <!-- Logo: klearis -->
+                <StackPanel Margin="16,21.5,72,38.6" 
+                            HorizontalAlignment="Left">
+                    <Image Source="/Assets/klearis-logo-transparent-white.png"
+                        Height="52"
+                        Stretch="Uniform"
+                        HorizontalAlignment="Left"/>
                 </StackPanel>
                 
-                <!-- Sanitize File Button (mavi, 40px) -->
+                <!-- Sanitize File Button -->
                 <Button x:Name="SanitizeFileButton"
-                        Height="40" Margin="16,0,16,12"
-                        Background="#6E92E1" Foreground="White"
-                        BorderThickness="0" CornerRadius="6"
-                        FontSize="14" FontWeight="Medium"
+                        Height="40" 
+                        Margin="14,0,14,12"
+                        Background="#6E92E1" 
+                        Foreground="White"
+                        BorderThickness="0" 
+                        CornerRadius="6"
+                        FontSize="14" 
+                        FontWeight="Medium"
                         HorizontalAlignment="Stretch"
                         HorizontalContentAlignment="Center"
-                        VerticalContentAlignment="Center" Padding="12">
+                        VerticalContentAlignment="Center" 
+                        Padding="14,11.5">
                     <TextBlock Text="Sanitize File"/>
                 </Button>
                 
                 <!-- Menu: Job History + Settings -->
-                <StackPanel Spacing="4" Margin="16,0,16,0">
+                <StackPanel Spacing="4" Margin="14,0,14,0">
                     
                     <!-- Job History (aktif - mavi) -->
                     <Button x:Name="JobHistoryButton"
-                            Height="36" Background="Transparent" Foreground="#6E92E1"
-                            BorderThickness="0"
+                            Height="40" 
+                            Background="#EBF2FE" 
+                            Foreground="#6B7280"
+                            BorderThickness="0" 
+                            CornerRadius="6"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Left"
-                            VerticalContentAlignment="Center" Padding="12,0">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="📋" FontSize="16"/>
-                            <TextBlock Text="Job History" FontSize="14" FontWeight="Medium"/>
+                            VerticalContentAlignment="Center" 
+                            Padding="8,10">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                             <Image Source="/Assets/file-history.png"
+                                   Width="20" Height="20"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock Text="Job History" 
+                                       FontSize="14" 
+                                       FontWeight="Medium"/>
                         </StackPanel>
                     </Button>
                     
                     <!-- Settings (pasif - gri) -->
                     <Button x:Name="SettingsButton"
-                            Height="36" Background="Transparent" Foreground="#6B7280"
+                            Height="40" 
+                            Background="Transparent" 
+                            Foreground="#6B7280"
                             BorderThickness="0"
                             HorizontalAlignment="Stretch"
                             HorizontalContentAlignment="Left"
-                            VerticalContentAlignment="Center" Padding="12,0">
-                        <StackPanel Orientation="Horizontal" Spacing="8">
-                            <TextBlock Text="⚙️" FontSize="16"/>
-                            <TextBlock Text="Settings" FontSize="14"/>
+                            VerticalContentAlignment="Center" 
+                            Padding="8,10">
+                        <StackPanel Orientation="Horizontal" Spacing="12">
+                            <!-- Settings icon -->
+                            <Image Source="/Assets/Settings.png"
+                                   Width="16" Height="16"
+                                   VerticalAlignment="Center"/>
+                            <TextBlock Text="Settings" 
+                                       FontSize="14"
+                                       VerticalAlignment="Center"/>
                         </StackPanel>
                     </Button>
                     
                 </StackPanel>
                 
-                <!-- Boşluk (profile'ı alta iter) -->
-                <Panel Height="400"/>
-                
-                <!-- User Profile (altta, açık gri kutu) -->
-                <Border Margin="16" Padding="12" Background="#F9FAFB" CornerRadius="8">
-                    <StackPanel Orientation="Horizontal" Spacing="12">
-                        <!-- Avatar (40x40 yuvarlak, mavi) -->
-                        <Border Width="40" Height="40" Background="#6E92E1" CornerRadius="20">
-                            <TextBlock Text="N" Foreground="White" FontSize="16" FontWeight="SemiBold"
-                                       HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                        </Border>
-                        <!-- İsim ve username -->
-                        <StackPanel VerticalAlignment="Center">
-                            <TextBlock Text="Name Last Name" FontSize="13" FontWeight="Medium" Foreground="#1F2937"/>
-                            <TextBlock Text="@username" FontSize="12" Foreground="#6B7280"/>
-                        </StackPanel>
-                    </StackPanel>
-                </Border>
-                
             </StackPanel>
             
         </Border>
         
-        <!-- ========== SAĞ CONTENT (Tablo buraya gelecek) ========== -->
+        <!-- ========== SAĞ CONTENT AREA ========== -->
         <Panel Grid.Column="1" Background="#F3F4F6">
-            <TextBlock Text="Right Content Area (Job History Table will be here)"
-                       HorizontalAlignment="Center" VerticalAlignment="Center"
-                       FontSize="16" Foreground="#6B7280"/>
+            
+            <DockPanel LastChildFill="True">
+                
+                <!-- ===== ÜST BAŞLIK (Job History + Sanitized Files Button) ===== -->
+                <Border DockPanel.Dock="Top" 
+                        Background="Transparent"                      
+                        Padding="16,21.5,16,16">
+                    <Grid ColumnDefinitions="*,Auto">
+                        
+                        <!-- Sol: Job History başlığı + icon -->
+                        <StackPanel Grid.Column="0"
+                                    Orientation="Horizontal"
+                                    Spacing="8"
+                                    VerticalAlignment="Center">
+                            <!-- Job History text -->
+                            <TextBlock Text="Job History"
+                                    FontSize="18"
+                                    FontWeight="Normal"
+                                    Foreground="#363D48"
+                                    VerticalAlignment="Center"
+                                    />
+                        </StackPanel>
+                        
+                        <!-- Sağ: Sanitized Files butonu (icon + text) -->
+                        <Button Grid.Column="1"
+                                x:Name="SanitizedFilesButton"
+                                Height="40"
+                                Padding="14,7"
+                                Background="White"
+                                Foreground="#6E92E1"
+                                BorderBrush="#6E92E1"
+                                BorderThickness="1"
+                                CornerRadius="6"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center">
+                            <StackPanel Orientation="Horizontal" Spacing="8">
+                                <!-- Sanitize File icon -->
+                                <Image Source="/Assets/sanitize-file.png"
+                                    Width="16" Height="16"
+                                    VerticalAlignment="Center"/>
+                                <!-- Button text -->
+                                <TextBlock Text="Sanitized Files"
+                                        FontSize="13"
+                                        FontWeight="Medium"
+                                        Foreground="#6E92E1"
+                                        VerticalAlignment="Center"/>
+                            </StackPanel>
+                        </Button>
+                        
+                    </Grid>
+                </Border>
+                
+                <!-- ===== BOŞ DURUM (NO DATA) ===== -->
+                <Border x:Name="NoDataPanel"
+                        DockPanel.Dock="Top"
+                        IsVisible="True"
+                        Background="Transparent"
+                        Margin="0,100,0,0">
+                    <StackPanel HorizontalAlignment="Center" 
+                                VerticalAlignment="Center"
+                                Spacing="24">
+                        
+                        <!-- İkon Grubu: Daire + Büyüteç -->
+                        <Grid Width="80" Height="80"
+                              HorizontalAlignment="Center">
+                            <!-- Arka plan daire -->
+                            <Image Source="/Assets/Ellipse1.png"
+                                   Width="80" Height="80"
+                                   Stretch="Uniform"/>
+                            <!-- Büyüteç ikonu (üstte) -->
+                            <Image Source="/Assets/search-data.png"
+                                   Width="80" Height="80"
+                                   Stretch="Uniform"/>
+                        </Grid>
+                        
+                        <!-- "No job history" başlığı -->
+                        <TextBlock Text="No job history"
+                                   FontSize="16"
+                                   FontWeight="Medium"
+                                   Foreground="#363D48"
+                                   TextAlignment="Center"/>
+                        
+                        <!-- "Sanitize files to start now" alt yazı -->
+                        <TextBlock Text="Sanitize files to start now"
+                                   FontSize="15"
+                                   Foreground="#495057"
+                                   TextAlignment="Center"/>
+                        
+                        <!-- Sanitize File butonu -->
+                        <Button Width="128" Height="40"
+                                Content="Sanitize File"
+                                Background="#5A7FD1"
+                                Foreground="White"
+                                BorderThickness="0"
+                                CornerRadius="6"
+                                FontSize="13"
+                                FontWeight="Medium"
+                                Padding="14,11.5"
+                                HorizontalContentAlignment="Center"
+                                VerticalContentAlignment="Center">
+                        </Button>
+                        
+                    </StackPanel>
+                </Border>
+                
+                <!-- ===== TABLO ALANI (Şimdilik gizli, veri gelince gösterilecek) ===== -->
+                <Border x:Name="TablePanel"
+                        DockPanel.Dock="Top"
+                        IsVisible="False"
+                        Background="#FFFFFF"
+                        Margin="32,0,32,24"
+                        CornerRadius="12"
+                        BoxShadow="0 1 3 #10000000">
+                    
+                    <Grid RowDefinitions="Auto,*">
+                        
+                        <!-- TABLO HEADER -->
+                        <Border Grid.Row="0"
+                                Background="#F9FAFB"
+                                BorderBrush="#E5E7EB"
+                                BorderThickness="0,0,0,1"
+                                Padding="24,16"
+                                CornerRadius="12,12,0,0">
+                            <Grid ColumnDefinitions="3*,1.5*,1*,1.5*,0.5*">
+                                <TextBlock Grid.Column="0" 
+                                           Text="File Name" 
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#6B7280"/>
+                                <TextBlock Grid.Column="1" 
+                                           Text="Status" 
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#6B7280"/>
+                                <TextBlock Grid.Column="2" 
+                                           Text="Size" 
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#6B7280"/>
+                                <TextBlock Grid.Column="3" 
+                                           Text="Creation Time" 
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#6B7280"/>
+                                <TextBlock Grid.Column="4" 
+                                           Text="Actions" 
+                                           FontSize="12" 
+                                           FontWeight="SemiBold" 
+                                           Foreground="#6B7280"
+                                           TextAlignment="Center"/>
+                            </Grid>
+                        </Border>
+                        
+                        <!-- TABLO BODY -->
+                        <ScrollViewer Grid.Row="1"
+                                      VerticalScrollBarVisibility="Auto"
+                                      HorizontalScrollBarVisibility="Disabled">
+                            
+                            <StackPanel x:Name="JobListPanel" Spacing="0">
+                                <!-- Dinamik veri buraya eklenecek -->
+                            </StackPanel>
+                            
+                        </ScrollViewer>
+                        
+                    </Grid>
+                    
+                </Border>
+                
+            </DockPanel>
+            
         </Panel>
         
     </Grid>
