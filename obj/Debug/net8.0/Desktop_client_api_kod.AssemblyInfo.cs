@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("Desktop_client_api_kod")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+663002e2b496dd8178611da3763a60812a01b1a5")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+8120f586ef1a11372ff85d6fbefa60d0872062d5")]
 [assembly: System.Reflection.AssemblyProductAttribute("Desktop_client_api_kod")]
 [assembly: System.Reflection.AssemblyTitleAttribute("Desktop_client_api_kod")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

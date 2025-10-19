@@ -77,7 +77,7 @@
                                      BorderThickness="1"
                                      CornerRadius="6"
                                      FontSize="14"
-                                     Foreground="#1F2937"
+                                     Foreground="#ffffffff"
                                      VerticalContentAlignment="Center"/>
 
                             <TextBlock x:Name="ErrorTextBlock"

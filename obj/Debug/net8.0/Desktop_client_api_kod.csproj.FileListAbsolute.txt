@@ -64,3 +64,4 @@ C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net8.0\Desktop_client_api
 C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net8.0\Desktop_.914BAEE5.Up2Date
 C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net8.0\Desktop_client_api_kod.genruntimeconfig.cache
 C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net8.0\ref\Desktop_client_api_kod.dll
+C:\Users\user\Desktop\Desktop_client_api_kod\obj\Debug\net8.0\Desktop_client_api_kod.sourcelink.json

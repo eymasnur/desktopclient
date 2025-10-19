@@ -1,21 +1,174 @@
-<!-- ================================================================ -->
-<!-- LOGIN VIEW - Giriş Ekranı                                         -->
-<!-- ================================================================ -->
-
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="Desktop_client_api_kod.Views.LoginView">
 
-    <!-- Ana Grid: Sol (436px) + Sağ (kalan) -->
-    <Grid ColumnDefinitions="436,*">
+    <!-- ViewBox yok! Direkt Grid -->
+    <!-- Sol:Sağ = 576:864 = 2:3 oranı -->
+    <Grid ColumnDefinitions="2*,3*">
         
         <!-- ========== SOL PANEL (Koyu Gri #363D48) ========== -->
         <Panel Grid.Column="0" Background="#363D48">
+            
+            <!-- DockPanel: Logo üstte, slogan altta -->
+            <DockPanel LastChildFill="True">
+                
+                <!-- Logo - Üstte sol köşede -->
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="24,24,0,0"
+                            HorizontalAlignment="Left">
+                    <Border Width="72" Height="72">
+                        <Image Source="/Assets/klearis-logo.png" 
+                               Stretch="Uniform"/>
+                    </Border>
+                </StackPanel>
+                
+                <!-- Slogan - Altta sabit -->
+                <StackPanel DockPanel.Dock="Bottom"
+                            Margin="24,0,0,24"
+                            HorizontalAlignment="Left">
+                    <TextBlock Text="Instant Data Safe."
+                               FontSize="20"
+                               Foreground="#FFFFFF"
+                               TextWrapping="Wrap"
+                               Width="268"/>
+                    <TextBlock Text="Confidently."
+                               FontSize="20"
+                               Foreground="#FFFFFF"
+                               TextWrapping="Wrap"
+                               Width="268"/>
+                    <TextBlock Text="At Scale."
+                               FontSize="20"
+                               Foreground="#FFFFFF"
+                               TextWrapping="Wrap"
+                               Width="268"/>
+                </StackPanel>
+                
+                <!-- Orta boş alan -->
+                <Panel/>
+                
+            </DockPanel>
             
         </Panel>
         
         <!-- ========== SAĞ PANEL (Açık Gri #F3F4F6) ========== -->
         <Panel Grid.Column="1" Background="#F3F4F6">
+            
+            <DockPanel LastChildFill="True">
+                
+                <!-- Dil Seçici - Üstte sağda -->
+                <StackPanel DockPanel.Dock="Top"
+                            Margin="0,32,32,0"
+                            HorizontalAlignment="Right">
+                    <TextBlock Text="🇺🇸 English"
+                               FontSize="14"
+                               Foreground="#6B7280"/>
+                </StackPanel>
+                
+                <!-- Login Modal - Ortada -->
+                <StackPanel HorizontalAlignment="Center"
+                            VerticalAlignment="Center">
+                    
+                    <!-- Modal Kutusu -->
+                    <Border Width="520"
+                            MaxWidth="520"
+                            CornerRadius="12"
+                            Background="#FFFFFF"
+                            Padding="32"
+                            BoxShadow="0 4 8 #40D2D2D2">
+                        
+                        <StackPanel Width="456" MaxWidth="456">
+                            
+                            <!-- Klearis Logo -->
+                            <StackPanel Orientation="Horizontal"
+                                        HorizontalAlignment="Center"
+                                        Margin="0,0,0,32">
+                                <Border Width="205" Height="53">
+                                    <Image Source="/Assets/klearis-logo-transparent-gray.png" 
+                                           Stretch="Uniform"/>
+                                </Border>
+                            </StackPanel>
+                            
+                            <!-- Username Input -->
+                            <StackPanel Spacing="4" Margin="0,0,0,20">
+                                <TextBlock Text="Username"
+                                           FontSize="13"
+                                           FontWeight="Medium"
+                                           Foreground="#363D48"/>
+                                
+                                <TextBox x:Name="UsernameTextBox"
+                                         Height="38"
+                                         Padding="14,12"
+                                         Watermark="Enter username"
+                                         Background="#FFFFFF"
+                                         BorderBrush="#CED4DA"
+                                         BorderThickness="1"
+                                         CornerRadius="6"
+                                         FontSize="14"
+                                         Foreground="#1F2937"
+                                         VerticalContentAlignment="Center"/>
+                            </StackPanel>
+                            
+                            <!-- Password Input -->
+                            <StackPanel Spacing="4" Margin="0,0,0,20">
+                                <TextBlock Text="Password"
+                                           FontSize="13"
+                                           FontWeight="Medium"
+                                           Foreground="#363D48"/>
+                                
+                                <TextBox x:Name="PasswordTextBox"
+                                         Height="38"
+                                         Padding="14,12"
+                                         Watermark="Enter password"
+                                         Background="#FFFFFF"
+                                         BorderBrush="#CED4DA"
+                                         BorderThickness="1"
+                                         CornerRadius="6"
+                                         FontSize="14"
+                                         Foreground="#1F2937"
+                                         VerticalContentAlignment="Center"
+                                         PasswordChar="•"/>
+                                
+                                <!-- Hata Mesajı -->
+                                <TextBlock x:Name="ErrorTextBlock"
+                                           Text="Invalid username or password"
+                                           FontSize="12"
+                                           Foreground="#ED5E5E"
+                                           IsVisible="False"
+                                           Margin="0,4,0,0"/>
+                            </StackPanel>
+                            
+                            <!-- Login Button -->
+                            <Button x:Name="LoginButton"
+                                    Height="38"
+                                    Content="Login"
+                                    Background="#6E92E1"
+                                    Foreground="White"
+                                    BorderThickness="0"
+                                    CornerRadius="6"
+                                    FontSize="13"
+                                    FontWeight="Medium"
+                                    HorizontalAlignment="Stretch"
+                                    HorizontalContentAlignment="Center"
+                                    VerticalContentAlignment="Center"
+                                    Padding="14,11.5">
+                                
+                                <Button.Styles>
+                                    <Style Selector="Button:pointerover">
+                                        <Setter Property="Background" Value="#5A7FD1"/>
+                                    </Style>
+                                    <Style Selector="Button:pressed">
+                                        <Setter Property="Background" Value="#4D6BB8"/>
+                                    </Style>
+                                </Button.Styles>
+                            </Button>
+                            
+                        </StackPanel>
+                        
+                    </Border>
+                    
+                </StackPanel>
+                
+            </DockPanel>
             
         </Panel>
         
