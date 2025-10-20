@@ -80,8 +80,36 @@ namespace Desktop_client_api_kod.Services
             
             response.EnsureSuccessStatusCode();
             
-            // JSON'dan CreateJobResponse'a çevir
             return JsonSerializer.Deserialize<CreateJobResponse>(responseBody);
+        }
+
+        // ✅ YENİ METOD - Job listesini JSON olarak döndür
+        // ✅ Job listesini Parse et ve döndür
+        public async Task<JobHistoryResponse> GetJobHistoryAsync(CancellationToken ct = default)
+        {
+            try
+            {
+                Console.WriteLine("🔄 Job history çekiliyor...");
+                
+                var response = await _api.GetRawAsync("integration/job/list", ct);
+                var json = await response.Content.ReadAsStringAsync(ct);
+                
+                Console.WriteLine($"✅ Status: {(int)response.StatusCode}");
+                
+                if (response.IsSuccessStatusCode)
+                {
+                    var result = System.Text.Json.JsonSerializer.Deserialize<JobHistoryResponse>(json);
+                    Console.WriteLine($"✅ {result?.data?.Count ?? 0} dosya bulundu!");
+                    return result;
+                }
+                
+                return null;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Hata: {ex.Message}");
+                return null;
+            }
         }
 
         // GET /integration/job/download/original/{id}
@@ -94,12 +122,6 @@ namespace Desktop_client_api_kod.Services
         public Task<HttpResponseMessage> DownloadSanitizedAsync(string id, CancellationToken ct = default)
         {
             return _api.GetRawAsync($"integration/job/download/sanitized/{id}", ct);
-        }
-
-        // GET /integration/job/list
-        public Task<HttpResponseMessage> ListJobsAsync(CancellationToken ct = default)
-        {
-            return _api.GetRawAsync("integration/job/list", ct);
         }
 
         // GET /integration/job/status/{id}
