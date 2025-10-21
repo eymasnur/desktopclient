@@ -3,8 +3,11 @@ using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using System;
+using System.Linq;
 using System.Threading.Tasks;
+using Avalonia.Media.Imaging;  // ✅ BUNU EKLE
 using Desktop_client_api_kod.Infrastructure;
+
 using Desktop_client_api_kod.Services;
 
 namespace Desktop_client_api_kod.Views
@@ -72,66 +75,95 @@ namespace Desktop_client_api_kod.Views
             }
         }
 
-        private Border CreateJobRow(string fileName, string status, long fileSize, string createdAt, string jobId)
+        private Border CreateJobRow(string fileName, string status, long fileSize, 
+                                   string createdAt, string jobId)
         {
             var row = new Border
             {
                 BorderBrush = new SolidColorBrush(Color.Parse("#E5E7EB")),
                 BorderThickness = new Avalonia.Thickness(0, 0, 0, 1),
-                Padding = new Avalonia.Thickness(16, 0, 16, 0),
-                Height = 42
+                Padding = new Avalonia.Thickness(24, 0, 24, 0),
+                Height = 42,
+                Margin = new Avalonia.Thickness(0),
+                Background = Brushes.Transparent
             };
 
             var grid = new Grid
             {
-                ColumnDefinitions = new ColumnDefinitions("3*,1.5*,1*,1.5*,0.5*")
+                ColumnDefinitions = new ColumnDefinitions("654,159,107,168,70"),
+                VerticalAlignment = VerticalAlignment.Center,
+                Height = 42,
+                Margin = new Avalonia.Thickness(0)
             };
 
-            // Column 0: File Name
+            // FILE NAME
             var fileNameText = new TextBlock
             {
                 Text = fileName ?? "Unknown",
                 FontSize = 13,
+                FontWeight = Avalonia.Media.FontWeight.Normal,
                 Foreground = new SolidColorBrush(Color.Parse("#1F2937")),
                 VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Avalonia.Thickness(0),
+                Padding = new Avalonia.Thickness(0),
                 TextTrimming = Avalonia.Media.TextTrimming.CharacterEllipsis
             };
             Grid.SetColumn(fileNameText, 0);
             grid.Children.Add(fileNameText);
 
-            // Column 1: Status Badge
+            // STATUS
             var statusBadge = CreateStatusBadge(status);
             Grid.SetColumn(statusBadge, 1);
             grid.Children.Add(statusBadge);
 
-            // Column 2: File Size
+            // SIZE
             var sizeText = new TextBlock
             {
                 Text = FormatFileSize(fileSize),
                 FontSize = 13,
+                FontWeight = Avalonia.Media.FontWeight.Normal,
                 Foreground = new SolidColorBrush(Color.Parse("#6B7280")),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Avalonia.Thickness(0),
+                Padding = new Avalonia.Thickness(0)
             };
             Grid.SetColumn(sizeText, 2);
             grid.Children.Add(sizeText);
 
-            // Column 3: Created At
+            // CREATION TIME
             var dateText = new TextBlock
             {
                 Text = FormatDate(createdAt),
                 FontSize = 13,
+                FontWeight = Avalonia.Media.FontWeight.Normal,
                 Foreground = new SolidColorBrush(Color.Parse("#6B7280")),
-                VerticalAlignment = VerticalAlignment.Center
+                VerticalAlignment = VerticalAlignment.Center,
+                HorizontalAlignment = HorizontalAlignment.Left,
+                Margin = new Avalonia.Thickness(0),
+                Padding = new Avalonia.Thickness(0)
             };
             Grid.SetColumn(dateText, 3);
             grid.Children.Add(dateText);
 
-            // Column 4: Actions (Download + 3 Dots)
+            // ACTIONS
             var actionsPanel = CreateActionsPanel(status, jobId);
             Grid.SetColumn(actionsPanel, 4);
             grid.Children.Add(actionsPanel);
 
             row.Child = grid;
+            
+            // HOVER EFFECT
+            row.PointerEntered += (s, e) =>
+            {
+                row.Background = new SolidColorBrush(Color.Parse("#F9FAFB"));
+            };
+            row.PointerExited += (s, e) =>
+            {
+                row.Background = Brushes.Transparent;
+            };
+            
             return row;
         }
 
@@ -148,16 +180,20 @@ namespace Desktop_client_api_kod.Views
                     backgroundColor = "#D1FAE5";
                     textColor = "#059669";
                     break;
+                    
                 case "FAILED":
                     displayText = "Failed";
                     backgroundColor = "#FEE2E2";
                     textColor = "#DC2626";
                     break;
+                    
                 case "NOT_SANITIZABLE":
+                case "NOT SANITIZABLE":
                     displayText = "Not Sanitizable";
                     backgroundColor = "#FEF3C7";
                     textColor = "#D97706";
                     break;
+                    
                 default:
                     displayText = status ?? "Unknown";
                     backgroundColor = "#F3F4F6";
@@ -168,15 +204,18 @@ namespace Desktop_client_api_kod.Views
             var badge = new Border
             {
                 Background = new SolidColorBrush(Color.Parse(backgroundColor)),
-                CornerRadius = new Avalonia.CornerRadius(12),
-                Padding = new Avalonia.Thickness(12, 4),
+                CornerRadius = new Avalonia.CornerRadius(12.5),
+                Padding = new Avalonia.Thickness(8, 4, 8, 4),
+                Height = 25,
                 HorizontalAlignment = HorizontalAlignment.Left,
                 Child = new TextBlock
                 {
                     Text = displayText,
-                    FontSize = 12,
+                    FontSize = 13,
                     FontWeight = Avalonia.Media.FontWeight.Medium,
-                    Foreground = new SolidColorBrush(Color.Parse(textColor))
+                    Foreground = new SolidColorBrush(Color.Parse(textColor)),
+                    VerticalAlignment = VerticalAlignment.Center,
+                    HorizontalAlignment = HorizontalAlignment.Center
                 }
             };
 
@@ -188,51 +227,75 @@ namespace Desktop_client_api_kod.Views
             var panel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Spacing = 8,
+                Spacing = 6, // İkonlar arası 6 px boşluk
+                Height = 42, //satır yüksekliği
+
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-            // Download butonu (sadece SANITIZED için)
-            if (status?.ToUpper() == "SANITIZED")
-            {
-                var downloadBtn = new Button
+           // DOWNLOAD BUTONU (Sadece SANITIZED için)
+           var downloadBtn = new Button
                 {
-                    Width = 20,
-                    Height = 20,
+                    Width = 24, // 16px ikon 4px padding ile toplam 24px
+                    Height = 32,
                     Background = Brushes.Transparent,
-                    BorderThickness = new Avalonia.Thickness(0),
-                    Padding = new Avalonia.Thickness(0),
-                    Content = new TextBlock
+                    BorderThickness = new Avalonia.Thickness(0),// Border kaldırıldı
+                    Padding = new Avalonia.Thickness(4), //her taraftan 4px padding
+                    Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
+                    Content = new Image
                     {
-                        Text = "📥",
-                        FontSize = 14,
-                        VerticalAlignment = VerticalAlignment.Center,
-                        HorizontalAlignment = HorizontalAlignment.Center
+                        Source = new Bitmap("Assets/download-sanitized-file.png"),
+                        Width = 16,
+                        Height = 16,
+                        Stretch = Avalonia.Media.Stretch.Uniform
                     }
                 };
-                downloadBtn.Click += (s, e) => DownloadFile(jobId);
-                panel.Children.Add(downloadBtn);
-            }
+                
+                downloadBtn.Click += (s, e) => DownloadFile(jobId);// Download butonu başı
+                
+                downloadBtn.PointerEntered += (s, e) => // Hover efekti
+                {
+                    downloadBtn.Background = new SolidColorBrush(Color.Parse("#F3F4F6"));
+                };
+                downloadBtn.PointerExited += (s, e) => 
+                {
+                    downloadBtn.Background = Brushes.Transparent;
+                };
 
-            // 3 nokta butonu (hep göster)
+                 panel.Children.Add(downloadBtn);// Download butonu sonu
+            
+                
+            
+            // 3 NOKTA BUTONU (Her zaman göster)
             var moreBtn = new Button
             {
-                Width = 20,
-                Height = 20,
+                Width = 32,
+                Height = 32,
                 Background = Brushes.Transparent,
                 BorderThickness = new Avalonia.Thickness(0),
                 Padding = new Avalonia.Thickness(0),
-                Content = new TextBlock
+                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand), // El imlecine değiştir
+                Content = new Image
                 {
-                    Text = "⋮",
-                    FontSize = 16,
-                    Foreground = new SolidColorBrush(Color.Parse("#6B7280")),
-                    VerticalAlignment = VerticalAlignment.Center,
-                    HorizontalAlignment = HorizontalAlignment.Center
-                }
+                    Source = new Bitmap("Assets/Icon.png"),
+                    Width = 16,
+                    Height = 16,
+                    Stretch=Avalonia.Media.Stretch.Uniform,
+               }          
             };
+            
             moreBtn.Click += (s, e) => ShowMoreOptions(jobId);
+            
+            moreBtn.PointerEntered += (s, e) => 
+            {
+                moreBtn.Opacity = 0.7;
+            };
+            moreBtn.PointerExited += (s, e) => 
+            {
+                moreBtn.Opacity = 1.0;
+            };
+            
             panel.Children.Add(moreBtn);
 
             return panel;
@@ -243,11 +306,11 @@ namespace Desktop_client_api_kod.Views
             if (bytes < 1024)
                 return $"{bytes} B";
             else if (bytes < 1024 * 1024)
-                return $"{bytes / 1024} KB";
+                return $"{Math.Round((double)bytes / 1024, 0)} KB";
             else if (bytes < 1024 * 1024 * 1024)
-                return $"{bytes / (1024 * 1024)} MB";
+                return $"{Math.Round((double)bytes / (1024 * 1024), 1)} MB";
             else
-                return $"{bytes / (1024 * 1024 * 1024)} GB";
+                return $"{Math.Round((double)bytes / (1024 * 1024 * 1024), 2)} GB";
         }
 
         private string FormatDate(string dateString)
@@ -255,7 +318,7 @@ namespace Desktop_client_api_kod.Views
             try
             {
                 var date = DateTime.Parse(dateString);
-                return date.ToString("dd-MM-yyyy HH:mm");
+                return date.ToString("yyyy-MM-dd HH:mm");
             }
             catch
             {
@@ -266,13 +329,11 @@ namespace Desktop_client_api_kod.Views
         private void DownloadFile(string jobId)
         {
             Console.WriteLine($"📥 Download: {jobId}");
-            // TODO: Download implementation
         }
 
         private void ShowMoreOptions(string jobId)
         {
             Console.WriteLine($"⋮ More options: {jobId}");
-            // TODO: Context menu implementation
         }
 
         private void SanitizeFileButton_Click(object sender, RoutedEventArgs e)

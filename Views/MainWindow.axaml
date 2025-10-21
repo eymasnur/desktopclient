@@ -10,5 +10,9 @@
         WindowStartupLocation="CenterScreen"
         CanResize="True"
         SystemDecorations="Full">
+        <!-- ❌ şimdilik YORUM SATIRINA AL -->
+    <!--
     <views:HostnameView />
+    -->
+    <views:JobHistoryView />
 </Window>
