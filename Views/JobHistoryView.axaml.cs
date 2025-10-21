@@ -1,13 +1,13 @@
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Interactivity;
 using Avalonia.Layout;
 using Avalonia.Media;
 using System;
 using System.Linq;
 using System.Threading.Tasks;
-using Avalonia.Media.Imaging;  // ✅ BUNU EKLE
+using Avalonia.Media.Imaging;
 using Desktop_client_api_kod.Infrastructure;
-
 using Desktop_client_api_kod.Services;
 
 namespace Desktop_client_api_kod.Views
@@ -25,12 +25,101 @@ namespace Desktop_client_api_kod.Views
             var httpClient = new HttpApiClient(_settingsStore);
             _integrationClient = new IntegrationClient(httpClient, _settingsStore);
             
+            // Buton event'lerini bağla
             SanitizeFileButton.Click += SanitizeFileButton_Click;
             SanitizedFilesButton.Click += SanitizedFilesButton_Click;
             SettingsButton.Click += SettingsButton_Click;
             
+            // ✅ Drag & Drop'u aktif et
+            SetupDragAndDrop();
+            
+            // Job listesini yükle
             _ = LoadJobsAsync();
         }
+
+        // ================================================================
+        // DRAG & DROP SETUP
+        // ================================================================
+        
+        /// <summary>
+        /// Drag & Drop özelliğini aktif eder
+        /// </summary>
+        private void SetupDragAndDrop()
+        {
+            // ✅ Attached property olarak ayarla
+            DragDrop.SetAllowDrop(this, true);
+            
+            // DragOver: Dosya kontrol üzerindeyken sürekli tetiklenir
+            AddHandler(DragDrop.DragOverEvent, DragOver);
+            
+            // DragLeave: Dosya kontrolden ayrıldığında tetiklenir
+            AddHandler(DragDrop.DragLeaveEvent, DragLeave);
+            
+            // Drop: Dosya bırakıldığında tetiklenir
+            AddHandler(DragDrop.DropEvent, Drop);
+        }
+
+        /// <summary>
+        /// Dosya kontrol üzerine geldiğinde çağrılır
+        /// </summary>
+        private void DragOver(object? sender, DragEventArgs e)
+        {
+            // e.Data: Sürüklenen veriler (dosya, metin, vb.)
+            // GetFileNames: Sürüklenen dosya yollarını döndürür
+            
+            if (e.Data.GetFileNames() != null)
+            {
+                // ✅ Dosya var, kabul et
+                // Copy: Dosyayı kopyala (Move yerine)
+                e.DragEffects = DragDropEffects.Copy;
+                
+                // Overlay'i göster
+                DragDropOverlay.IsVisible = true;
+            }
+            else
+            {
+                // ❌ Dosya yok (metin vb.), reddet
+                e.DragEffects = DragDropEffects.None;
+            }
+            
+            // Handled = true: Event'i işledik, üst kontrole gönderme
+            e.Handled = true;
+        }
+
+        /// <summary>
+        /// Dosya kontrolden ayrıldığında çağrılır
+        /// </summary>
+        private void DragLeave(object? sender, DragEventArgs e)
+        {
+            // Overlay'i gizle**********
+            DragDropOverlay.IsVisible = false;
+        }
+
+        /// <summary>
+        /// Dosya bırakıldığında çağrılır
+        /// </summary>
+        private void Drop(object? sender, DragEventArgs e)
+        {
+            DragDropOverlay.IsVisible = false;
+            e.Handled = true; // Event'i işledik
+    
+            var files = e.Data.GetFileNames()?.ToList();
+            
+            if (files != null && files.Any())
+            {
+                Console.WriteLine($"📁 {files.Count} dosya bırakıldı:");
+                foreach (var file in files)
+                {
+                    Console.WriteLine($"   - {file}");
+                }
+                
+                // TODO: Sonraki adımda upload işlemi yapılacak
+            }
+        }
+
+        // ================================================================
+        // JOB LOADING
+        // ================================================================
 
         private async Task LoadJobsAsync()
         {
@@ -74,6 +163,10 @@ namespace Desktop_client_api_kod.Views
                 ToggleNoDataState(hasData: false);
             }
         }
+
+        // ================================================================
+        // UI CREATION
+        // ================================================================
 
         private Border CreateJobRow(string fileName, string status, long fileSize, 
                                    string createdAt, string jobId)
@@ -227,47 +320,44 @@ namespace Desktop_client_api_kod.Views
             var panel = new StackPanel
             {
                 Orientation = Orientation.Horizontal,
-                Spacing = 6, // İkonlar arası 6 px boşluk
-                Height = 42, //satır yüksekliği
-
+                Spacing = 6,
+                Height = 42,
                 HorizontalAlignment = HorizontalAlignment.Center,
                 VerticalAlignment = VerticalAlignment.Center
             };
 
-           // DOWNLOAD BUTONU (Sadece SANITIZED için)
-           var downloadBtn = new Button
+            // DOWNLOAD BUTONU
+            var downloadBtn = new Button
+            {
+                Width = 24,
+                Height = 32,
+                Background = Brushes.Transparent,
+                BorderThickness = new Avalonia.Thickness(0),
+                Padding = new Avalonia.Thickness(4),
+                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
+                Content = new Image
                 {
-                    Width = 24, // 16px ikon 4px padding ile toplam 24px
-                    Height = 32,
-                    Background = Brushes.Transparent,
-                    BorderThickness = new Avalonia.Thickness(0),// Border kaldırıldı
-                    Padding = new Avalonia.Thickness(4), //her taraftan 4px padding
-                    Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
-                    Content = new Image
-                    {
-                        Source = new Bitmap("Assets/download-sanitized-file.png"),
-                        Width = 16,
-                        Height = 16,
-                        Stretch = Avalonia.Media.Stretch.Uniform
-                    }
-                };
-                
-                downloadBtn.Click += (s, e) => DownloadFile(jobId);// Download butonu başı
-                
-                downloadBtn.PointerEntered += (s, e) => // Hover efekti
-                {
-                    downloadBtn.Background = new SolidColorBrush(Color.Parse("#F3F4F6"));
-                };
-                downloadBtn.PointerExited += (s, e) => 
-                {
-                    downloadBtn.Background = Brushes.Transparent;
-                };
+                    Source = new Bitmap("Assets/cloud-manual.png"),
+                    Width = 42.17,
+                    Height = 30.67,
+                    Stretch = Avalonia.Media.Stretch.Uniform
+                }
+            };
+            
+            downloadBtn.Click += (s, e) => DownloadFile(jobId);
+            
+            downloadBtn.PointerEntered += (s, e) =>
+            {
+                downloadBtn.Background = new SolidColorBrush(Color.Parse("#F3F4F6"));
+            };
+            downloadBtn.PointerExited += (s, e) => 
+            {
+                downloadBtn.Background = Brushes.Transparent;
+            };
 
-                 panel.Children.Add(downloadBtn);// Download butonu sonu
+            panel.Children.Add(downloadBtn);
             
-                
-            
-            // 3 NOKTA BUTONU (Her zaman göster)
+            // 3 NOKTA BUTONU
             var moreBtn = new Button
             {
                 Width = 32,
@@ -275,14 +365,14 @@ namespace Desktop_client_api_kod.Views
                 Background = Brushes.Transparent,
                 BorderThickness = new Avalonia.Thickness(0),
                 Padding = new Avalonia.Thickness(0),
-                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand), // El imlecine değiştir
+                Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
                 Content = new Image
                 {
                     Source = new Bitmap("Assets/Icon.png"),
                     Width = 16,
                     Height = 16,
-                    Stretch=Avalonia.Media.Stretch.Uniform,
-               }          
+                    Stretch = Avalonia.Media.Stretch.Uniform,
+                }          
             };
             
             moreBtn.Click += (s, e) => ShowMoreOptions(jobId);
@@ -300,6 +390,10 @@ namespace Desktop_client_api_kod.Views
 
             return panel;
         }
+
+        // ================================================================
+        // HELPERS
+        // ================================================================
 
         private string FormatFileSize(long bytes)
         {
@@ -325,6 +419,10 @@ namespace Desktop_client_api_kod.Views
                 return dateString;
             }
         }
+
+        // ================================================================
+        // BUTTON CLICK HANDLERS
+        // ================================================================
 
         private void DownloadFile(string jobId)
         {

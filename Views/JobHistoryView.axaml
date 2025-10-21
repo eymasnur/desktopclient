@@ -301,6 +301,52 @@
             
         </Panel>
         
+        <!-- ============================================================ -->
+        <!-- DRAG & DROP OVERLAY - Dosya sürüklendiğinde görünür          -->
+        <!-- ============================================================ -->
+        <Panel x:Name="DragDropOverlay"
+               Grid.ColumnSpan="2"
+               IsVisible="False"
+               IsHitTestVisible="False"
+               Background="#CC363D48"
+               ZIndex="100">
+            
+            <!-- ZIndex=100: En üstte görünsün -->
+            <!-- Background=#CC363D48: %80 opak koyu gri (CC = 204/255 = 0.8 alpha) -->
+            
+            <StackPanel HorizontalAlignment="Center"
+                        VerticalAlignment="Center"
+                        Spacing="24">
+                
+                <!-- Mavi Daire + Upload İkonu -->
+                <Grid Width="120" Height="120"
+                      HorizontalAlignment="Center">
+                    
+                    <!-- Mavi daire arka plan -->
+                    <Ellipse Width="120" Height="120"
+                             Fill="#6E92E1"/>
+                    
+                    <!-- Upload ikonu (cloud-manual.png) -->
+                    <Image Source="/Assets/cloud-manual.png"
+                           Width="64" 
+                           Height="64"
+                           Stretch="Uniform"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+                    
+                </Grid>
+                
+                <!-- "Drag and drop to sanitize files" yazısı -->
+                <TextBlock Text="Drag and drop to sanitize files"
+                           FontSize="18"
+                           FontWeight="Medium"
+                           Foreground="White"
+                           TextAlignment="Center"/>
+                
+            </StackPanel>
+            
+        </Panel>
+        
     </Grid>
 
 </UserControl>
