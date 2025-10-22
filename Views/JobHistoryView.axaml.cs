@@ -9,6 +9,8 @@ using System.Threading.Tasks;
 using Avalonia.Media.Imaging;
 using Desktop_client_api_kod.Infrastructure;
 using Desktop_client_api_kod.Services;
+using System.IO;
+using System.Collections.Generic;
 
 namespace Desktop_client_api_kod.Views
 {
@@ -29,6 +31,7 @@ namespace Desktop_client_api_kod.Views
             SanitizeFileButton.Click += SanitizeFileButton_Click;
             SanitizedFilesButton.Click += SanitizedFilesButton_Click;
             SettingsButton.Click += SettingsButton_Click;
+            CloseUploadButton.Click += CloseUploadButton_Click;
             
             // ✅ Drag & Drop'u aktif et
             SetupDragAndDrop();
@@ -38,83 +41,244 @@ namespace Desktop_client_api_kod.Views
         }
 
         // ================================================================
-        // DRAG & DROP SETUP
+        // PUBLIC METHOD - MainWindow'dan çağrılabilir
         // ================================================================
         
         /// <summary>
-        /// Drag & Drop özelliğini aktif eder
+        /// Dışarıdan (MainWindow) dosya drop edildiğinde çağrılır
         /// </summary>
+        public void HandleFilesDropped(System.Collections.Generic.List<string> filePaths)
+        {
+            Console.WriteLine($"📥 JobHistoryView.HandleFilesDropped çağrıldı: {filePaths.Count} dosya");
+            _ = UploadFilesAsync(filePaths);
+        }
+
+        // ================================================================
+        // DRAG & DROP SETUP
+        // ================================================================
+        
         private void SetupDragAndDrop()
         {
-            // ✅ Attached property olarak ayarla
             DragDrop.SetAllowDrop(this, true);
-            
-            // DragOver: Dosya kontrol üzerindeyken sürekli tetiklenir
             AddHandler(DragDrop.DragOverEvent, DragOver);
-            
-            // DragLeave: Dosya kontrolden ayrıldığında tetiklenir
             AddHandler(DragDrop.DragLeaveEvent, DragLeave);
-            
-            // Drop: Dosya bırakıldığında tetiklenir
             AddHandler(DragDrop.DropEvent, Drop);
         }
 
-        /// <summary>
-        /// Dosya kontrol üzerine geldiğinde çağrılır
-        /// </summary>
         private void DragOver(object? sender, DragEventArgs e)
         {
-            // e.Data: Sürüklenen veriler (dosya, metin, vb.)
-            // GetFileNames: Sürüklenen dosya yollarını döndürür
-            
             if (e.Data.GetFileNames() != null)
             {
-                // ✅ Dosya var, kabul et
-                // Copy: Dosyayı kopyala (Move yerine)
                 e.DragEffects = DragDropEffects.Copy;
-                
-                // Overlay'i göster
                 DragDropOverlay.IsVisible = true;
             }
             else
             {
-                // ❌ Dosya yok (metin vb.), reddet
                 e.DragEffects = DragDropEffects.None;
             }
             
-            // Handled = true: Event'i işledik, üst kontrole gönderme
             e.Handled = true;
         }
 
-        /// <summary>
-        /// Dosya kontrolden ayrıldığında çağrılır
-        /// </summary>
         private void DragLeave(object? sender, DragEventArgs e)
         {
-            // Overlay'i gizle**********
             DragDropOverlay.IsVisible = false;
         }
 
-        /// <summary>
-        /// Dosya bırakıldığında çağrılır
-        /// </summary>
-        private void Drop(object? sender, DragEventArgs e)
+        private async void Drop(object? sender, DragEventArgs e)
         {
+            // Overlay'i gizle
             DragDropOverlay.IsVisible = false;
-            e.Handled = true; // Event'i işledik
+            e.Handled = true;
     
             var files = e.Data.GetFileNames()?.ToList();
             
-            if (files != null && files.Any())
+            if (files == null || !files.Any())
             {
-                Console.WriteLine($"📁 {files.Count} dosya bırakıldı:");
-                foreach (var file in files)
+                return;
+            }
+            
+            Console.WriteLine($"\n📁 {files.Count} dosya bırakıldı:");
+            foreach (var file in files)
+            {
+                Console.WriteLine($"   - {file}");
+            }
+            
+            // ✅ Upload işlemini başlat
+            await UploadFilesAsync(files);
+        }
+
+        // ================================================================
+        // UPLOAD LOGIC
+        // ================================================================
+        
+        private async Task UploadFilesAsync(List<string> filePaths)
+        {
+            try
+            {
+                // 1. Settings'ten API Key al
+                var settings = await _settingsStore.LoadAsync();
+                
+                // API Key kontrolü ve varsayılan değer
+                var apiKey = settings.ApiKey;
+                if (string.IsNullOrWhiteSpace(apiKey))
                 {
-                    Console.WriteLine($"   - {file}");
+                    apiKey = "84e3ea0bc8fff1c93d1b5a42f3ac91432beb01b41a827001ff53a3832f227864";
+                    Console.WriteLine("⚠️ Settings'te API Key yok, varsayılan kullanılıyor");
                 }
                 
-                // TODO: Sonraki adımda upload işlemi yapılacak
+                Console.WriteLine($"🔑 API Key: {apiKey.Substring(0, 20)}...");
+                
+                // 2. Upload popup'ı göster
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    ShowUploadPopup(filePaths.Count);
+                    UpdateUploadFileList(filePaths);
+                });
+                
+                // 3. Her dosyayı sırayla upload et
+                int successCount = 0;
+                
+                foreach (var filePath in filePaths)
+                {
+                    if (!File.Exists(filePath))
+                    {
+                        Console.WriteLine($"⚠️ Dosya bulunamadı: {filePath}");
+                        continue;
+                    }
+                    
+                    try
+                    {
+                        await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                        {
+                            UpdateUploadStatus($"Uploading {Path.GetFileName(filePath)}...");
+                        });
+                        
+                        // Batch name oluştur
+                        var batchName = $"desktop_upload_{DateTime.Now:yyyyMMdd_HHmmss}";
+                        
+                        Console.WriteLine($"\n📤 Yükleniyor: {Path.GetFileName(filePath)}");
+                        
+                        // API'ye dosyayı yükle
+                        var response = await _integrationClient.CreateJobsAsync(
+                            apiKey: apiKey,
+                            batchName: batchName,
+                            passwordList: null,
+                            filePath: filePath,
+                            allowInsecureCertificates: true
+                        );
+                        
+                        if (response != null && !response.error)
+                        {
+                            Console.WriteLine($"✅ Upload başarılı: {Path.GetFileName(filePath)}");
+                            successCount++;
+                        }
+                        else
+                        {
+                            Console.WriteLine($"❌ Upload başarısız: {response?.message}");
+                        }
+                        
+                        // Kısa bir delay (rate limiting için)
+                        await Task.Delay(500);
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"❌ Upload hatası: {ex.Message}");
+                    }
+                }
+                
+                // 4. Upload tamamlandı
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    UpdateUploadStatus($"Upload complete! ({successCount}/{filePaths.Count})");
+                });
+                
+                // 5. 1.5 saniye bekle, sonra popup'ı kapat
+                await Task.Delay(1500);
+                
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    HideUploadPopup();
+                });
+                
+                // 6. Job listesini yenile
+                if (successCount > 0)
+                {
+                    Console.WriteLine("\n🔄 Job listesi yenileniyor...");
+                    await Task.Delay(2000); // Backend'in job'ı oluşturması için bekle
+                    await LoadJobsAsync();
+                }
             }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"❌ Upload işlemi hatası: {ex.Message}");
+                
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    ShowUploadError(ex.Message);
+                });
+                
+                await Task.Delay(2000);
+                
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    HideUploadPopup();
+                });
+            }
+        }
+        
+        // ================================================================
+        // UPLOAD POPUP HELPERS
+        // ================================================================
+        
+        private void ShowUploadPopup(int fileCount)
+        {
+            var fileText = fileCount == 1 ? "1 file" : $"{fileCount} files";
+            UploadTitleText.Text = $"Uploading {fileText}...";
+            UploadProgressPopup.IsVisible = true;
+        }
+        
+        private void HideUploadPopup()
+        {
+            UploadProgressPopup.IsVisible = false;
+            UploadFileListPanel.Children.Clear();
+        }
+        
+        private void UpdateUploadFileList(List<string> filePaths)
+        {
+            UploadFileListPanel.Children.Clear();
+            
+            foreach (var filePath in filePaths)
+            {
+                var fileName = Path.GetFileName(filePath);
+                var fileSize = new FileInfo(filePath).Length;
+                
+                var fileText = new TextBlock
+                {
+                    Text = $"{fileName} ({FormatFileSize(fileSize)})",
+                    FontSize = 12,
+                    Foreground = new SolidColorBrush(Color.Parse("#6B7280")),
+                    TextTrimming = TextTrimming.CharacterEllipsis
+                };
+                
+                UploadFileListPanel.Children.Add(fileText);
+            }
+        }
+        
+        private void UpdateUploadStatus(string status)
+        {
+            UploadStatusText.Text = status;
+        }
+        
+        private void ShowUploadError(string error)
+        {
+            UploadStatusText.Text = $"Error: {error}";
+            UploadStatusText.Foreground = new SolidColorBrush(Color.Parse("#DC2626"));
+        }
+        
+        private void CloseUploadButton_Click(object sender, RoutedEventArgs e)
+        {
+            HideUploadPopup();
         }
 
         // ================================================================
@@ -337,9 +501,9 @@ namespace Desktop_client_api_kod.Views
                 Cursor = new Avalonia.Input.Cursor(Avalonia.Input.StandardCursorType.Hand),
                 Content = new Image
                 {
-                    Source = new Bitmap("Assets/cloud-manual.png"),
-                    Width = 42.17,
-                    Height = 30.67,
+                    Source = new Bitmap("Assets/download-sanitized-file.png"),
+                    Width = 16,
+                    Height = 16,
                     Stretch = Avalonia.Media.Stretch.Uniform
                 }
             };

@@ -1,5 +1,5 @@
 <!-- ================================================================ -->
-<!-- JOB HISTORY VIEW - İş Geçmişi Ekranı                            -->
+<!-- JOB HISTORY VIEW - İş Geçmişi Ekranı + Upload Popup            -->
 <!-- ================================================================ -->
 <UserControl xmlns="https://github.com/avaloniaui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -167,7 +167,7 @@
                                    Width="80" Height="80"
                                    Stretch="Uniform"/>
                             <Image Source="/Assets/search-data.png"
-                                   Width="80" Height="80"
+                                   Width="35.9" Height="35.9"
                                    Stretch="Uniform"/>
                         </Grid>
                         
@@ -183,6 +183,7 @@
                                    TextAlignment="Center"/>
                         
                         <Button Width="128" Height="40"
+                                HorizontalAlignment="Center"
                                 Content="Sanitize File"
                                 Background="#5A7FD1"
                                 Foreground="White"
@@ -190,7 +191,8 @@
                                 CornerRadius="6"
                                 FontSize="13"
                                 FontWeight="Medium"
-                                Padding="14,11.5"/>
+                                Padding="14,11.5,14,11.5"
+                                />
                         
                     </StackPanel>
                 </Border>
@@ -311,9 +313,6 @@
                Background="#CC363D48"
                ZIndex="100">
             
-            <!-- ZIndex=100: En üstte görünsün -->
-            <!-- Background=#CC363D48: %80 opak koyu gri (CC = 204/255 = 0.8 alpha) -->
-            
             <StackPanel HorizontalAlignment="Center"
                         VerticalAlignment="Center"
                         Spacing="24">
@@ -322,11 +321,9 @@
                 <Grid Width="120" Height="120"
                       HorizontalAlignment="Center">
                     
-                    <!-- Mavi daire arka plan -->
                     <Ellipse Width="120" Height="120"
                              Fill="#6E92E1"/>
                     
-                    <!-- Upload ikonu (cloud-manual.png) -->
                     <Image Source="/Assets/cloud-manual.png"
                            Width="64" 
                            Height="64"
@@ -336,7 +333,6 @@
                     
                 </Grid>
                 
-                <!-- "Drag and drop to sanitize files" yazısı -->
                 <TextBlock Text="Drag and drop to sanitize files"
                            FontSize="18"
                            FontWeight="Medium"
@@ -346,6 +342,117 @@
             </StackPanel>
             
         </Panel>
+        
+        <!-- ============================================================ -->
+        <!-- UPLOAD PROGRESS POPUP - Sağ altta 336x131                    -->
+        <!-- ============================================================ -->
+        <Border x:Name="UploadProgressPopup"
+                Grid.ColumnSpan="2"
+                Width="336"
+                Height="131"
+                CornerRadius="8"
+                Background="#FFFFFF"
+                BorderBrush="#E5E7EB"
+                BorderThickness="1"
+                IsVisible="True"
+                VerticalAlignment="Bottom"
+                HorizontalAlignment="Right"
+                Margin="0,0,32,32"
+                ZIndex="999">
+            
+            <StackPanel Margin="20" Spacing="12">
+                
+                <!-- Başlık + Close Button -->
+                <Grid ColumnDefinitions="*,Auto">
+                    
+                    <StackPanel Grid.Column="0" 
+                                Orientation="Horizontal" 
+                                Spacing="12"
+                                VerticalAlignment="Center">
+                        
+                        <!-- Upload İkonu (Mavi Daire) -->
+                        <Border Width="32" Height="32"
+                                CornerRadius="16"
+                                Background="#EEF2FF">
+                            <Image Source="/Assets/cloud-manual.png"
+                                   Width="18" Height="18"
+                                   Stretch="Uniform"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                        </Border>
+                        
+                        <!-- "Uploading X files..." -->
+                        <TextBlock x:Name="UploadTitleText"
+                                   Text="Uploading 1 file..."
+                                   FontSize="14"
+                                   FontWeight="SemiBold"
+                                   Foreground="#1F2937"
+                                   VerticalAlignment="Center"/>
+                        
+                    </StackPanel>
+                    
+                    <!-- Close Button (X) -->
+                    <Button Grid.Column="1"
+                            x:Name="CloseUploadButton"
+                            Width="24" Height="24"
+                            Background="Transparent"
+                            BorderThickness="0"
+                            Padding="0"
+                            VerticalAlignment="Center"
+                            Cursor="Hand">
+                        <TextBlock Text="✕"
+                                   FontSize="16"
+                                   Foreground="#6B7280"
+                                   HorizontalAlignment="Center"
+                                   VerticalAlignment="Center"/>
+                    </Button>
+                    
+                </Grid>
+                
+                <!-- Dosya İsimleri (ScrollViewer ile) -->
+                <ScrollViewer MaxHeight="40"
+                              VerticalScrollBarVisibility="Auto"
+                              HorizontalScrollBarVisibility="Disabled">
+                    <StackPanel x:Name="UploadFileListPanel" Spacing="4">
+                        <!-- Dosya isimleri buraya eklenecek -->
+                    </StackPanel>
+                </ScrollViewer>
+                
+                <!-- Progress Indicator (Spinner) -->
+                <StackPanel Orientation="Horizontal" Spacing="8">
+                    <TextBlock Text="●"
+                               FontSize="12"
+                               Foreground="#6E92E1"
+                               VerticalAlignment="Center">
+                        <TextBlock.Styles>
+                            <Style Selector="TextBlock">
+                                <Style.Animations>
+                                    <Animation Duration="0:0:1" IterationCount="Infinite">
+                                        <KeyFrame Cue="0%">
+                                            <Setter Property="Opacity" Value="1.0"/>
+                                        </KeyFrame>
+                                        <KeyFrame Cue="50%">
+                                            <Setter Property="Opacity" Value="0.3"/>
+                                        </KeyFrame>
+                                        <KeyFrame Cue="100%">
+                                            <Setter Property="Opacity" Value="1.0"/>
+                                        </KeyFrame>
+                                    </Animation>
+                                </Style.Animations>
+                            </Style>
+                        </TextBlock.Styles>
+                    </TextBlock>
+                    
+                    <TextBlock x:Name="UploadStatusText"
+                               Text="Uploading..."
+                               FontSize="12"
+                               Foreground="#6B7280"
+                               VerticalAlignment="Center"/>
+                </StackPanel>
+                
+            </StackPanel>
+            
+        </Border>
         
     </Grid>
 
