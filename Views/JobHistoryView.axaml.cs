@@ -36,6 +36,9 @@ namespace Desktop_client_api_kod.Views
             // ✅ Drag & Drop'u aktif et
             SetupDragAndDrop();
             
+            // ✅ Popup'ı başlangıçta gizle (AXAML'de True olsa bile)
+            HideUploadPopup();
+            
             // Job listesini yükle
             _ = LoadJobsAsync();
         }
@@ -109,13 +112,22 @@ namespace Desktop_client_api_kod.Views
         }
 
         // ================================================================
-        // UPLOAD LOGIC
+        // UPLOAD LOGIC - ✅ DÜZELTME: Try-finally ile popup güvence altında
         // ================================================================
         
         private async Task UploadFilesAsync(List<string> filePaths)
         {
+            int successCount = 0;
+            bool hadError = false;
+            string errorMessage = "";
+            
             try
             {
+                Console.WriteLine($"\n🚀 ========================================");
+                Console.WriteLine($"🚀 UPLOAD İŞLEMİ BAŞLATILIYOR");
+                Console.WriteLine($"🚀 Dosya Sayısı: {filePaths.Count}");
+                Console.WriteLine($"🚀 ========================================\n");
+                
                 // 1. Settings'ten API Key al
                 var settings = await _settingsStore.LoadAsync();
                 
@@ -128,19 +140,24 @@ namespace Desktop_client_api_kod.Views
                 }
                 
                 Console.WriteLine($"🔑 API Key: {apiKey.Substring(0, 20)}...");
+                Console.WriteLine($"🌐 Base URL: {settings.BaseUrl}");
                 
                 // 2. Upload popup'ı göster
                 await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
+                    Console.WriteLine("📱 Popup gösteriliyor...");
                     ShowUploadPopup(filePaths.Count);
                     UpdateUploadFileList(filePaths);
                 });
                 
-                // 3. Her dosyayı sırayla upload et
-                int successCount = 0;
+                Console.WriteLine("✅ Popup görüntülendi\n");
                 
+                // 3. Her dosyayı sırayla upload et
                 foreach (var filePath in filePaths)
                 {
+                    Console.WriteLine($"───────────────────────────────────────");
+                    Console.WriteLine($"📂 İşlenen Dosya: {Path.GetFileName(filePath)}");
+                    
                     if (!File.Exists(filePath))
                     {
                         Console.WriteLine($"⚠️ Dosya bulunamadı: {filePath}");
@@ -157,7 +174,8 @@ namespace Desktop_client_api_kod.Views
                         // Batch name oluştur
                         var batchName = $"desktop_upload_{DateTime.Now:yyyyMMdd_HHmmss}";
                         
-                        Console.WriteLine($"\n📤 Yükleniyor: {Path.GetFileName(filePath)}");
+                        Console.WriteLine($"📦 Batch Name: {batchName}");
+                        Console.WriteLine($"📤 API'ye gönderiliyor...");
                         
                         // API'ye dosyayı yükle
                         var response = await _integrationClient.CreateJobsAsync(
@@ -170,7 +188,9 @@ namespace Desktop_client_api_kod.Views
                         
                         if (response != null && !response.error)
                         {
-                            Console.WriteLine($"✅ Upload başarılı: {Path.GetFileName(filePath)}");
+                            Console.WriteLine($"✅ Upload başarılı!");
+                            Console.WriteLine($"   Job ID: {response.data?.user_job_ids?[0]}");
+                            Console.WriteLine($"   Batch ID: {response.data?.id}");
                             successCount++;
                         }
                         else
@@ -183,35 +203,43 @@ namespace Desktop_client_api_kod.Views
                     }
                     catch (Exception ex)
                     {
-                        Console.WriteLine($"❌ Upload hatası: {ex.Message}");
+                        Console.WriteLine($"❌ Upload hatası ({Path.GetFileName(filePath)}):");
+                        Console.WriteLine($"   Mesaj: {ex.Message}");
+                        Console.WriteLine($"   Stack: {ex.StackTrace}");
                     }
                 }
                 
-                // 4. Upload tamamlandı
+                // 4. Upload tamamlandı - Status güncelle
+                Console.WriteLine($"\n───────────────────────────────────────");
+                Console.WriteLine($"✅ UPLOAD İŞLEMİ TAMAMLANDI");
+                Console.WriteLine($"   Başarılı: {successCount}/{filePaths.Count}");
+                Console.WriteLine($"───────────────────────────────────────\n");
+                
                 await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
-                    UpdateUploadStatus($"Upload complete! ({successCount}/{filePaths.Count})");
+                    if (successCount > 0)
+                    {
+                        UpdateUploadStatus($"✓ Upload complete! ({successCount}/{filePaths.Count})");
+                    }
+                    else
+                    {
+                        UpdateUploadStatus("Upload failed!");
+                    }
                 });
                 
-                // 5. 1.5 saniye bekle, sonra popup'ı kapat
+                // 5. Kısa süre göster
                 await Task.Delay(1500);
-                
-                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
-                {
-                    HideUploadPopup();
-                });
-                
-                // 6. Job listesini yenile
-                if (successCount > 0)
-                {
-                    Console.WriteLine("\n🔄 Job listesi yenileniyor...");
-                    await Task.Delay(2000); // Backend'in job'ı oluşturması için bekle
-                    await LoadJobsAsync();
-                }
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Upload işlemi hatası: {ex.Message}");
+                hadError = true;
+                errorMessage = ex.Message;
+                
+                Console.WriteLine($"\n❌ ========================================");
+                Console.WriteLine($"❌ UPLOAD İŞLEMİ KRİTİK HATASI");
+                Console.WriteLine($"❌ Mesaj: {ex.Message}");
+                Console.WriteLine($"❌ Stack: {ex.StackTrace}");
+                Console.WriteLine($"❌ ========================================\n");
                 
                 await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
                 {
@@ -219,11 +247,59 @@ namespace Desktop_client_api_kod.Views
                 });
                 
                 await Task.Delay(2000);
+            }
+            finally
+            {
+                // ✅ HER DURUMDA popup'ı kapat (exception olsa bile)
+                Console.WriteLine("🔄 ========================================");
+                Console.WriteLine("🔄 POPUP KAPATILIYOR...");
                 
-                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                try
                 {
-                    HideUploadPopup();
-                });
+                    await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                    {
+                        HideUploadPopup();
+                    });
+                    
+                    Console.WriteLine("✅ Popup başarıyla kapatıldı");
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine($"⚠️ Popup kapatma hatası: {ex.Message}");
+                }
+                
+                // Job listesini yenile (başarılı upload varsa)
+                if (successCount > 0 && !hadError)
+                {
+                    Console.WriteLine("\n🔄 JOB LİSTESİ YENİLENİYOR...");
+                    Console.WriteLine("⏳ Backend'in job'ı kaydetmesi için 3 saniye bekleniyor...");
+                    
+                    try
+                    {
+                        // Backend'in job'ı kaydetmesi için daha fazla bekle
+                        await Task.Delay(3000); // 2 saniye yerine 3 saniye
+                        
+                        Console.WriteLine("📊 LoadJobsAsync çağrılıyor...");
+                        await LoadJobsAsync();
+                        Console.WriteLine("✅ Job listesi yenilendi");
+                    }
+                    catch (Exception ex)
+                    {
+                        Console.WriteLine($"⚠️ Job listesi yenileme hatası: {ex.Message}");
+                        Console.WriteLine($"   Stack: {ex.StackTrace}");
+                    }
+                }
+                else if (hadError)
+                {
+                    Console.WriteLine($"⚠️ Hata nedeniyle job listesi yenilenmedi: {errorMessage}");
+                }
+                else
+                {
+                    Console.WriteLine("⚠️ Başarılı upload olmadığı için job listesi yenilenmedi");
+                }
+                
+                Console.WriteLine("✅ UPLOAD İŞLEMİ TAMAMEN TAMAMLANDI");
+                Console.WriteLine("🔄 ========================================\n");
             }
         }
         
@@ -268,6 +344,8 @@ namespace Desktop_client_api_kod.Views
         private void UpdateUploadStatus(string status)
         {
             UploadStatusText.Text = status;
+            // Rengi normal renge döndür (hata rengi kaldır)
+            UploadStatusText.Foreground = new SolidColorBrush(Color.Parse("#6B7280"));
         }
         
         private void ShowUploadError(string error)
@@ -278,6 +356,7 @@ namespace Desktop_client_api_kod.Views
         
         private void CloseUploadButton_Click(object sender, RoutedEventArgs e)
         {
+            Console.WriteLine("❌ Kullanıcı popup'ı manuel olarak kapattı");
             HideUploadPopup();
         }
 
@@ -289,41 +368,65 @@ namespace Desktop_client_api_kod.Views
         {
             try
             {
-                Console.WriteLine("\n📊 Job'lar yükleniyor...\n");
+                Console.WriteLine("\n📊 ========================================");
+                Console.WriteLine("📊 JOB LİSTESİ YÜKLENİYOR...");
+                Console.WriteLine("📊 ========================================\n");
                 
                 var result = await _integrationClient.GetJobHistoryAsync();
                 
-                if (result == null || result.data == null || result.data.Count == 0)
+                if (result == null)
                 {
+                    Console.WriteLine("❌ API'den null response geldi");
                     ToggleNoDataState(hasData: false);
-                    Console.WriteLine("❌ Hiç job bulunamadı");
                     return;
                 }
                 
-                ToggleNoDataState(hasData: true);
-                
-                JobListPanel.Children.Clear();
-                
-                foreach (var item in result.data)
+                if (result.data == null || result.data.Count == 0)
                 {
-                    var jobInfo = item.user_job_info;
-                    
-                    var row = CreateJobRow(
-                        jobInfo.file_name,
-                        jobInfo.status,
-                        jobInfo.file_size,
-                        jobInfo.created_at,
-                        jobInfo.user_job_id
-                    );
-                    
-                    JobListPanel.Children.Add(row);
+                    Console.WriteLine("❌ Hiç job bulunamadı (data boş)");
+                    ToggleNoDataState(hasData: false);
+                    return;
                 }
                 
-                Console.WriteLine($"✅ {result.data.Count} dosya UI'da gösterildi!\n");
+                Console.WriteLine($"✅ {result.data.Count} job bulundu\n");
+                
+                ToggleNoDataState(hasData: true);
+                
+                // UI Thread'de job listesini güncelle
+                await Avalonia.Threading.Dispatcher.UIThread.InvokeAsync(() =>
+                {
+                    Console.WriteLine("🔄 UI güncelleniyor...");
+                    JobListPanel.Children.Clear();
+                    
+                    foreach (var item in result.data)
+                    {
+                        var jobInfo = item.user_job_info;
+                        
+                        Console.WriteLine($"   📄 {jobInfo.file_name} - {jobInfo.status}");
+                        
+                        var row = CreateJobRow(
+                            jobInfo.file_name,
+                            jobInfo.status,
+                            jobInfo.file_size,
+                            jobInfo.created_at,
+                            jobInfo.user_job_id
+                        );
+                        
+                        JobListPanel.Children.Add(row);
+                    }
+                });
+                
+                Console.WriteLine($"\n✅ {result.data.Count} dosya UI'da gösterildi!");
+                Console.WriteLine("📊 ========================================\n");
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ HATA: {ex.Message}\n");
+                Console.WriteLine($"\n❌ ========================================");
+                Console.WriteLine($"❌ JOB LİSTESİ YÜKLEME HATASI");
+                Console.WriteLine($"❌ Mesaj: {ex.Message}");
+                Console.WriteLine($"❌ Stack: {ex.StackTrace}");
+                Console.WriteLine($"❌ ========================================\n");
+                
                 ToggleNoDataState(hasData: false);
             }
         }

@@ -83,31 +83,59 @@ namespace Desktop_client_api_kod.Services
             return JsonSerializer.Deserialize<CreateJobResponse>(responseBody);
         }
 
-        // ✅ YENİ METOD - Job listesini JSON olarak döndür
-        // ✅ Job listesini Parse et ve döndür
+        // ✅ DÜZELTME: Basitleştirilmiş job history çekme
         public async Task<JobHistoryResponse> GetJobHistoryAsync(CancellationToken ct = default)
         {
             try
             {
-                Console.WriteLine("🔄 Job history çekiliyor...");
+                Console.WriteLine("\n📊 JOB HISTORY YÜKLENIYOR...");
                 
-                var response = await _api.GetRawAsync("integration/job/list", ct);
+                var settings = await _settingsStore.LoadAsync();
+                Console.WriteLine($"🌐 Base URL: {settings.BaseUrl}");
+                Console.WriteLine($"🔑 API Key: {(string.IsNullOrEmpty(settings.ApiKey) ? "YOK ❌" : "✅ VAR")}");
+                Console.WriteLine($"🎫 Auth Token: {(string.IsNullOrEmpty(settings.AuthToken) ? "YOK ❌" : "✅ VAR")}");
+                
+                var endpoint = "integration/job/list";
+                Console.WriteLine($"📡 Endpoint: {endpoint}");
+                
+                var response = await _api.GetRawAsync(endpoint, ct);
+                var statusCode = (int)response.StatusCode;
                 var json = await response.Content.ReadAsStringAsync(ct);
                 
-                Console.WriteLine($"✅ Status: {(int)response.StatusCode}");
+                Console.WriteLine($"📊 HTTP Status: {statusCode}");
+                Console.WriteLine($"📄 Response ({json.Length} chars): {json.Substring(0, Math.Min(500, json.Length))}...");
                 
-                if (response.IsSuccessStatusCode)
+                if (!response.IsSuccessStatusCode)
                 {
-                    var result = System.Text.Json.JsonSerializer.Deserialize<JobHistoryResponse>(json);
-                    Console.WriteLine($"✅ {result?.data?.Count ?? 0} dosya bulundu!");
-                    return result;
+                    Console.WriteLine($"❌ API başarısız: {statusCode}");
+                    return null;
                 }
                 
-                return null;
+                var result = JsonSerializer.Deserialize<JobHistoryResponse>(json);
+                
+                if (result?.data != null && result.data.Count > 0)
+                {
+                    Console.WriteLine($"✅ {result.data.Count} job bulundu!");
+                    foreach (var item in result.data)
+                    {
+                        Console.WriteLine($"   📄 {item.user_job_info.file_name} - {item.user_job_info.status}");
+                    }
+                }
+                else
+                {
+                    Console.WriteLine($"⚠️ Hiç job bulunamadı (data count: {result?.data?.Count ?? 0})");
+                }
+                
+                return result;
             }
             catch (Exception ex)
             {
-                Console.WriteLine($"❌ Hata: {ex.Message}");
+                Console.WriteLine($"❌ Job history hatası: {ex.GetType().Name}");
+                Console.WriteLine($"   Mesaj: {ex.Message}");
+                if (ex.InnerException != null)
+                {
+                    Console.WriteLine($"   Inner: {ex.InnerException.Message}");
+                }
                 return null;
             }
         }
