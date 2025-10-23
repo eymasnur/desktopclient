@@ -26,8 +26,9 @@
                         HorizontalAlignment="Left"/>
                 </StackPanel>
                 
-                <!-- SANİTİZE FILE BUTONU -->
+                <!-- SANİTİZE FILE BUTONU - ✅ Click event eklendi -->
                 <Button x:Name="SanitizeFileButton"
+                        Click="SanitizeFileButton_Click"
                         Height="40" 
                         Margin="14,0,14,12"
                         Background="#6E92E1" 
@@ -69,6 +70,7 @@
                     
                     <!-- SETTINGS -->
                     <Button x:Name="SettingsButton"
+                            Click="SettingsButton_Click"
                             Height="40" 
                             Background="Transparent" 
                             Foreground="#6B7280"
@@ -124,6 +126,7 @@
                         <!-- SAĞ: "Sanitized Files" Butonu -->
                         <Button Grid.Column="1"
                                 x:Name="SanitizedFilesButton"
+                                Click="SanitizedFilesButton_Click"
                                 Height="40"
                                 Padding="16,8"
                                 Background="White"
@@ -192,6 +195,7 @@
                                 FontSize="13"
                                 FontWeight="Medium"
                                 Padding="14,11.5,14,11.5"
+                                Click="SanitizeFileButton_Click"
                                 />
                         
                     </StackPanel>
@@ -333,7 +337,7 @@
                     
                 </Grid>
                 
-                <TextBlock Text="Drag and drop to sanitize files"
+                <TextBlock Text="Drag and drop to sanitize file"
                            FontSize="18"
                            FontWeight="Medium"
                            Foreground="White"
@@ -354,7 +358,7 @@
                 Background="#FFFFFF"
                 BorderBrush="#E5E7EB"
                 BorderThickness="1"
-                IsVisible="True"
+                IsVisible="False"
                 VerticalAlignment="Bottom"
                 HorizontalAlignment="Right"
                 Margin="0,0,32,32"
@@ -394,6 +398,7 @@
                     <!-- Close Button (X) -->
                     <Button Grid.Column="1"
                             x:Name="CloseUploadButton"
+                            Click="CloseUploadButton_Click"
                             Width="24" Height="24"
                             Background="Transparent"
                             BorderThickness="0"
