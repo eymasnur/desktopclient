@@ -63,6 +63,86 @@ namespace Desktop_client_api_kod.Views
             await UploadFilesAsync(filePaths);
         }
 
+        /// <summary>
+        /// Context menu'den gelen dosyayı upload eder (popup göstermeden)
+        /// </summary>
+        public async Task UploadFileForContextMenuAsync(string filePath)
+        {
+            Console.WriteLine($"\n🎯 UploadFileForContextMenuAsync başladı: {Path.GetFileName(filePath)}");
+            
+            try
+            {
+                // 1. Dosya var mı kontrol et
+                if (!File.Exists(filePath))
+                {
+                    Console.WriteLine($"❌ Dosya bulunamadı: {filePath}");
+                    throw new FileNotFoundException($"File not found: {filePath}");
+                }
+                
+                // 2. Settings'ten API Key al
+                var settings = await _settingsStore.LoadAsync();
+                
+                var apiKey = settings.ApiKey;
+                if (string.IsNullOrWhiteSpace(apiKey))
+                {
+                    apiKey = "84e3ea0bc8fff1c93d1b5a42f3ac91432beb01b41a827001ff53a3832f227864";
+                    Console.WriteLine("⚠️ Settings'te API Key yok, varsayılan kullanılıyor");
+                }
+                
+                Console.WriteLine($"🔑 API Key: {apiKey.Substring(0, 20)}...");
+                
+                // 3. Batch name oluştur
+                var timestamp = DateTime.Now.ToString("yyyyMMdd_HHmmss_fff");
+                var batchName = $"context_menu_{timestamp}";
+                
+                Console.WriteLine($"📦 Batch Name: {batchName}");
+                Console.WriteLine($"📤 API'ye gönderiliyor...");
+                
+                // 4. API'ye dosyayı yükle
+                var response = await _integrationClient.CreateJobsAsync(
+                    apiKey: apiKey,
+                    batchName: batchName,
+                    passwordList: null,
+                    filePath: filePath,
+                    allowInsecureCertificates: true
+                );
+                
+                if (response != null && !response.error)
+                {
+                    Console.WriteLine($"✅ Upload başarılı!");
+                    Console.WriteLine($"   Job ID: {response.data?.user_job_ids?[0]}");
+                    Console.WriteLine($"   Batch ID: {response.data?.id}");
+                }
+                else
+                {
+                    Console.WriteLine($"❌ Upload başarısız: {response?.message}");
+                    throw new Exception(response?.message ?? "Upload failed");
+                }
+                
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"\n❌ ========================================");
+                Console.WriteLine($"❌ CONTEXT MENU UPLOAD HATASI");
+                Console.WriteLine($"❌ Mesaj: {ex.Message}");
+                Console.WriteLine($"❌ ========================================\n");
+                throw;
+            }
+        }
+
+        /// <summary>
+        /// Job listesini dışarıdan yenilemek için public metod
+        /// </summary>
+        public async void RefreshJobList()
+        {
+            Console.WriteLine("🔄 Job listesi yenileniyor (external call)...");
+            
+            // Backend'in kaydetmesi için bekle
+            await Task.Delay(3000);
+            
+            await LoadJobsAsync();
+        }
+
         // ================================================================
         // DRAG & DROP SETUP
         // ================================================================

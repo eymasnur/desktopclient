@@ -1,0 +1,59 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="Desktop_client_api_kod.Views.SuccessDialog"
+        Title="File Sanitized"
+        Width="400"
+        Height="240"
+        WindowStartupLocation="CenterScreen"
+        CanResize="False"
+        SystemDecorations="Full"
+        ShowInTaskbar="True">
+    
+    <Border Background="#FFFFFF" Padding="32">
+        <StackPanel Spacing="24" VerticalAlignment="Center">
+            
+            <!-- Yeşil Tick İkonu -->
+            <Grid Width="64" Height="64" HorizontalAlignment="Center">
+                <Ellipse Width="64" Height="64" Fill="#10B981"/>
+                <TextBlock Text="✓"
+                           FontSize="36"
+                           FontWeight="Bold"
+                           Foreground="White"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Center"/>
+            </Grid>
+            
+            <!-- Başlık -->
+            <TextBlock Text="File Sanitized"
+                       FontSize="20"
+                       FontWeight="SemiBold"
+                       Foreground="#1F2937"
+                       TextAlignment="Center"/>
+            
+            <!-- Açıklama -->
+            <TextBlock x:Name="MessageText"
+                       Text="History of Status.docx has been sanitized. You can view it in the app."
+                       FontSize="14"
+                       Foreground="#6B7280"
+                       TextAlignment="Center"
+                       TextWrapping="Wrap"
+                       MaxWidth="336"/>
+            
+            <!-- Open App Butonu -->
+            <Button x:Name="OpenAppButton"
+                    Click="OpenAppButton_Click"
+                    Width="336"
+                    Height="40"
+                    Background="#6E92E1"
+                    Foreground="White"
+                    BorderThickness="0"
+                    CornerRadius="6"
+                    FontSize="14"
+                    FontWeight="Medium"
+                    HorizontalAlignment="Center"
+                    Content="Open App"/>
+            
+        </StackPanel>
+    </Border>
+    
+</Window>

@@ -35,3 +35,9 @@ build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
 
 [C:/Users/user/Desktop/Desktop_client_api_kod/Views/MainWindow.axaml]
 build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/user/Desktop/Desktop_client_api_kod/Views/SanitizingDialog.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
+
+[C:/Users/user/Desktop/Desktop_client_api_kod/Views/SuccessDialog.axaml]
+build_metadata.AdditionalFiles.SourceItemGroup = AvaloniaXaml
